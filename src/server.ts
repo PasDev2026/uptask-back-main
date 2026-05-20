@@ -18,6 +18,10 @@ connectDB().then(() => {
 const app = express();
 app.use(cors(corsConfig))
 
+app.get('/', (req, res) => {
+    res.send('Backend funcionando');
+});
+
 //Login
 app.use(morgan('dev')) //<- leer los datos del formulario
 app.use(express.json()); //<-ojo activar para recibir json
