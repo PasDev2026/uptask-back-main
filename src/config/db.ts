@@ -3,7 +3,7 @@ import {exit} from 'node:process';
 
 export const connectDB = async() => {
     try {
-        const conecction = await mongoose.connect(process.env.DATABASE_URL || '');
+        const conecction = await mongoose.connect(process.env.MONGO_URI || '');
         console.log(`Conexion exitosa con la base de datos ${conecction.connection.host}`);
         return conecction;
     } catch (error: any ) {
