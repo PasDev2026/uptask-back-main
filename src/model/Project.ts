@@ -27,19 +27,16 @@ const ProjectSchema:Schema = new Schema({
         type: String,
         required: true,
         trim    : true,
-        unique  : true
     },
     clientName: {
         type: String,
         required: true,
         trim    : true,
-        unique  : true
     },
     description: {
         type: String,
         required: true,
         trim    : true,
-        unique  : true
     },
     manager: {
         type: Types.ObjectId,

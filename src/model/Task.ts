@@ -14,7 +14,7 @@ export type TaskStatus = typeof taskStatus[keyof typeof taskStatus];
 
 export interface ITask extends Document {
     name: string,
-    description: string  
+    description?: string  
     project: Types.ObjectId
     status: TaskStatus
     priority: TaskPriority
@@ -40,7 +40,7 @@ export const TaskSchema: Schema = new Schema({
     description: {
         type: String,
         trim: true,
-        required: true,
+        required: false,
     },
     project: {
         type: Types.ObjectId,

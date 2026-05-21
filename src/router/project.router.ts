@@ -99,16 +99,16 @@ router.param('taskId', taskBelongToProject)
 
 // Batch reorder (must be before :taskId routes to avoid param conflict)
 router.put('/dashboard/:projectId/tasks-order',
-    hasAuthorization,
+    isProjectMember,
     body('tasks').isArray().withMessage('Se requiere un array de tareas con orden'),
     handleErrors,
     TaskController.reorderTasks
 )
 
 router.post('/dashboard/:projectId/tasks',
-    hasAuthorization,
+    isProjectMember,
     body('name').not().isEmpty().withMessage('El nombre de la tarea es obligatorio'),
-    body('description').not().isEmpty().withMessage('La descripcion es obligatoria'),
+    body('description').optional(),
     body('startDate').optional().isISO8601().withMessage('Formato de fecha de inicio inválido'),
     body('dueDate').optional().isISO8601().withMessage('Formato de fecha límite inválido'),
     body('priority').optional().isIn(Object.values(taskPriority)).withMessage('Prioridad inválida'),
@@ -129,10 +129,10 @@ router.get('/dashboard/:projectId/tasks/:taskId',
 )
 
 router.put('/dashboard/:projectId/tasks/:taskId', 
-    hasAuthorization,
+    isProjectMember,
     param('taskId').isMongoId().withMessage('El id de la tarea es obligatorio'),
     body('name').not().isEmpty().withMessage('El nombre de la tarea es obligatorio'),
-    body('description').not().isEmpty().withMessage('La descripcion es obligatoria'),
+    body('description').optional(),
     body('startDate').optional().isISO8601().withMessage('Formato de fecha de inicio inválido'),
     body('dueDate').optional().isISO8601().withMessage('Formato de fecha límite inválido'),
     body('priority').optional().isIn(Object.values(taskPriority)).withMessage('Prioridad inválida'),
@@ -148,7 +148,7 @@ router.delete('/dashboard/:projectId/tasks/:taskId',
 )
 
 router.patch('/dashboard/:projectId/tasks/:taskId/dates',
-    hasAuthorization,
+    isProjectMember,
     param('taskId').isMongoId().withMessage('El id de la tarea es obligatorio'),
     body('startDate').optional({ checkFalsy: true }).isISO8601().withMessage('Formato de fecha de inicio inválido'),
     body('dueDate').optional({ checkFalsy: true }).isISO8601().withMessage('Formato de fecha límite inválido'),
@@ -157,7 +157,7 @@ router.patch('/dashboard/:projectId/tasks/:taskId/dates',
 )
 
 router.patch('/dashboard/:projectId/tasks/:taskId/priority',
-    hasAuthorization,
+    isProjectMember,
     param('taskId').isMongoId().withMessage('El id de la tarea es obligatorio'),
     body('priority').optional().isIn([...Object.values(taskPriority), null]).withMessage('Prioridad inválida'),
     handleErrors,
@@ -165,7 +165,7 @@ router.patch('/dashboard/:projectId/tasks/:taskId/priority',
 )
 
 router.patch('/dashboard/:projectId/tasks/:taskId/assign',
-    hasAuthorization,
+    isProjectMember,
     body('userIds').isArray().withMessage('Se requiere un array de identificadores de usuario'),
     handleErrors,
     TaskController.assignTask
@@ -193,8 +193,8 @@ router.get('/dashboard/:projectId/tasks/:taskId/tree',
 )
 
 router.put('/dashboard/:projectId/tasks/:taskId/move',
-    hasAuthorization,
-    param('taskId').isMongoId().withMessage('El id de la tarea es obligatorio'),
+    isProjectMember,
+    param('taskId').isMongoId().withMessage('El id de la tarea padre es obligatorio'),
     body('newParentTask').isMongoId().withMessage('El id de la tarea padre es obligatorio'),
     handleErrors,
     TaskController.moveTask

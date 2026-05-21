@@ -18,7 +18,7 @@ export class ProjectController {
       resp.json({ projects, total });
     } catch (error) {
       console.log(error);
-      resp.status(500).json({ error: 'Error del servidor' });
+      resp.status(500).json({ error: error.message });
     }
   };
 
@@ -48,6 +48,7 @@ export class ProjectController {
       res.send('Proyecto creado correctamente');
     } catch (error) {
       console.log(error);
+      res.status(500).json({ error: error.message });
     }
  
   };

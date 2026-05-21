@@ -35,7 +35,7 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
             }
         }
     } catch (error) {
-        res.status(500).json({error: 'Token no válido'})
+        res.status(401).json({error: 'Token no válido'})
         return
     }
 
