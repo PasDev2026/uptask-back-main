@@ -4,7 +4,7 @@ import { ProjectController } from '../controllers/ProjectController'
 import { handleErrors } from '../middleware/validation'
 import { TaskController } from '../controllers/TaskController'
 import { validateProjectExists } from '../middleware/project'
-import { hasAuthorization, isProjectMember, taskBelongToProject, tasktExists } from '../middleware/task'
+import { hasAuthorization, taskBelongToProject, tasktExists } from '../middleware/task'
 import { projectStatus, taskPriority } from '../constants'
 import { authenticateToken } from '../middleware/auth'
 import { belongsToEmpresa } from '../middleware/empresa'
@@ -105,7 +105,6 @@ router.param('taskId', taskBelongToProject)
 // Batch reorder (must be before :taskId routes to avoid param conflict)
 router.put('/dashboard/:projectId/tasks-order',
     belongsToEmpresa,
-    isProjectMember,
     body('tasks').isArray().withMessage('Se requiere un array de tareas con orden'),
     handleErrors,
     TaskController.reorderTasks
@@ -113,7 +112,6 @@ router.put('/dashboard/:projectId/tasks-order',
 
 router.post('/dashboard/:projectId/tasks',
     belongsToEmpresa,
-    isProjectMember,
     body('name').not().isEmpty().withMessage('El nombre de la tarea es obligatorio'),
     body('description').optional(),
     body('startDate').optional().isISO8601().withMessage('Formato de fecha de inicio inválido'),
@@ -139,7 +137,6 @@ router.get('/dashboard/:projectId/tasks/:taskId',
 
 router.put('/dashboard/:projectId/tasks/:taskId', 
     belongsToEmpresa,
-    isProjectMember,
     param('taskId').isMongoId().withMessage('El id de la tarea es obligatorio'),
     body('name').not().isEmpty().withMessage('El nombre de la tarea es obligatorio'),
     body('description').optional(),
@@ -152,7 +149,6 @@ router.put('/dashboard/:projectId/tasks/:taskId',
 
 router.delete('/dashboard/:projectId/tasks/:taskId', 
     belongsToEmpresa,
-    isProjectMember,
     param('taskId').isMongoId().withMessage('El id de la tarea es obligatorio'),
     handleErrors,
     TaskController.deleteTask
@@ -208,7 +204,6 @@ router.get('/dashboard/:projectId/tasks/:taskId/tree',
 
 router.put('/dashboard/:projectId/tasks/:taskId/move',
     belongsToEmpresa,
-    isProjectMember,
     param('taskId').isMongoId().withMessage('El id de la tarea padre es obligatorio'),
     body('newParentTask').isMongoId().withMessage('El id de la tarea padre es obligatorio'),
     handleErrors,
