@@ -14,7 +14,7 @@ export class ProjectController {
       const dateTo = req.query.dateTo as string | undefined;
       const offset = parseInt(req.query.offset as string) || 0;
       const limit = parseInt(req.query.limit as string) || 10;
-      const { projects, total } = await ProjectService.findAllForUser(req.user.id, search, dateFrom, dateTo, offset, limit)
+      const { projects, total } = await ProjectService.findAllForUser(req.user.id, search, dateFrom, dateTo, offset, limit, req.user.empresas)
       resp.json({ projects, total });
     } catch (error) {
       console.log(error);
@@ -24,6 +24,19 @@ export class ProjectController {
 
   //creando proyecto
   static createProject = async (req: Request, res: Response) => {
+    const { empresa } = req.body
+
+    if (!empresa) {
+      res.status(400).json({ error: 'La empresa es obligatoria' })
+      return
+    }
+
+    const userEmpresas = req.user.empresas.map(e => e.toString())
+    if (!userEmpresas.includes(empresa)) {
+      res.status(403).json({ error: 'No perteneces a la empresa seleccionada' })
+      return
+    }
+
     const project = new Project(req.body);
  
     //Asigna un manager
@@ -31,6 +44,9 @@ export class ProjectController {
 
     //Responsable por defecto es el manager
     project.responsible = [req.user.id]
+
+    //Asigna la empresa
+    project.empresa = empresa
 
     //Si no se envía startDate, se asigna la fecha actual
     if (!req.body.startDate) {
@@ -64,7 +80,8 @@ export class ProjectController {
         return
       }
 
-      if(project.manager.toString() !== req.user.id.toString() && !project.team.some((memberId) => memberId.toString() === req.user.id.toString()) ){
+      const userEmpresas = req.user.empresas.map(e => e.toString())
+      if (!userEmpresas.includes(project.empresa.toString())) {
         const error = new Error('No se relacionan')
         res.status(404).json({error: error.message})
         return
@@ -96,7 +113,8 @@ export class ProjectController {
         return
       }
 
-      if (project.manager.toString() !== req.user.id.toString() && !project.team.includes(req.user.id)) {
+      const userEmpresas = req.user.empresas.map(e => e.toString())
+      if (!userEmpresas.includes(project.empresa.toString())) {
         res.status(403).json({ error: 'No autorizado' })
         return
       }

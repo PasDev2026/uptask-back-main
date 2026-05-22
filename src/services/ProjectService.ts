@@ -101,15 +101,12 @@ export class ProjectService {
     return projects;
   }
 
-  static async findAllForUser(userId: string, search?: string, dateFrom?: string, dateTo?: string, offset = 0, limit = 10) {
-    const userObjectId = new Types.ObjectId(userId);
+  static async findAllForUser(userId: string, search?: string, dateFrom?: string, dateTo?: string, offset = 0, limit = 10, empresaIds?: Types.ObjectId[]) {
+    if (empresaIds && empresaIds.length === 0) return { projects: [], total: 0 };
 
-    const userProjects = await Project.find({
-      $or: [
-        { manager: userObjectId },
-        { team: { $in: [userObjectId] } }
-      ]
-    }).select('_id');
+    const empresaFilter = empresaIds ? { empresa: { $in: empresaIds } } : {};
+
+    const userProjects = await Project.find(empresaFilter).select('_id');
 
     const projectIds = userProjects.map(p => p._id);
     if (projectIds.length === 0) return { projects: [], total: 0 };

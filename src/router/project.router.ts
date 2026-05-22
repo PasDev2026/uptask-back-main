@@ -7,6 +7,7 @@ import { validateProjectExists } from '../middleware/project'
 import { hasAuthorization, isProjectMember, taskBelongToProject, tasktExists } from '../middleware/task'
 import { projectStatus, taskPriority } from '../constants'
 import { authenticateToken } from '../middleware/auth'
+import { belongsToEmpresa } from '../middleware/empresa'
 import { TeamMemberController } from '../controllers/TeamMenmberController'
 import { NoteController } from '../controllers/NoteController'
 
@@ -21,6 +22,7 @@ router.post('/dashboard/projects',
     body('projectName').not().isEmpty().withMessage('El nombre del proyecto es obligatorio'),
     body('clientName').not().isEmpty().withMessage('El nombre del cliente es obligatorio'),
     body('description').not().isEmpty().withMessage('La descripcion es obligatoria'),
+    body('empresa').not().isEmpty().withMessage('La empresa es obligatoria'),
     body('startDate').optional().isISO8601().withMessage('Formato de fecha de inicio inválido'),
     body('dueDate').optional().isISO8601().withMessage('Formato de fecha límite inválido'),
     handleErrors,
@@ -53,6 +55,7 @@ router.put('/dashboard/projects/:projectId',
     body('startDate').optional().isISO8601().withMessage('Formato de fecha de inicio inválido'),
     body('dueDate').optional().isISO8601().withMessage('Formato de fecha límite inválido'),
     handleErrors,
+    belongsToEmpresa,
     hasAuthorization,
     ProjectController.updateProject
 )
@@ -60,6 +63,7 @@ router.put('/dashboard/projects/:projectId',
 router.delete('/dashboard/projects/:projectId',
     param('projectId').isMongoId().withMessage('El id es obligatorio'),
     handleErrors,
+    belongsToEmpresa,
     hasAuthorization,
     ProjectController.deleteProject
 )
@@ -87,6 +91,7 @@ router.patch('/dashboard/projects/:id/priority',
 )
 
 router.patch('/dashboard/projects/:projectId/responsible',
+    belongsToEmpresa,
     hasAuthorization,
     body('userIds').isArray().withMessage('Se requiere un array de identificadores de usuario'),
     handleErrors,
@@ -99,6 +104,7 @@ router.param('taskId', taskBelongToProject)
 
 // Batch reorder (must be before :taskId routes to avoid param conflict)
 router.put('/dashboard/:projectId/tasks-order',
+    belongsToEmpresa,
     isProjectMember,
     body('tasks').isArray().withMessage('Se requiere un array de tareas con orden'),
     handleErrors,
@@ -106,6 +112,7 @@ router.put('/dashboard/:projectId/tasks-order',
 )
 
 router.post('/dashboard/:projectId/tasks',
+    belongsToEmpresa,
     isProjectMember,
     body('name').not().isEmpty().withMessage('El nombre de la tarea es obligatorio'),
     body('description').optional(),
@@ -117,18 +124,21 @@ router.post('/dashboard/:projectId/tasks',
 )
 
 router.get('/dashboard/:projectId/tasks', 
+    belongsToEmpresa,
     param('projectId').isMongoId().withMessage('El id es obligatorio'),
     handleErrors,
     TaskController.getProjectTask
 )
 
 router.get('/dashboard/:projectId/tasks/:taskId', 
+    belongsToEmpresa,
     param('taskId').isMongoId().withMessage('El id de la tarea es obligatorio'),
     handleErrors,
     TaskController.getTaskById,
 )
 
 router.put('/dashboard/:projectId/tasks/:taskId', 
+    belongsToEmpresa,
     isProjectMember,
     param('taskId').isMongoId().withMessage('El id de la tarea es obligatorio'),
     body('name').not().isEmpty().withMessage('El nombre de la tarea es obligatorio'),
@@ -141,6 +151,7 @@ router.put('/dashboard/:projectId/tasks/:taskId',
 )
 
 router.delete('/dashboard/:projectId/tasks/:taskId', 
+    belongsToEmpresa,
     isProjectMember,
     param('taskId').isMongoId().withMessage('El id de la tarea es obligatorio'),
     handleErrors,
@@ -148,7 +159,7 @@ router.delete('/dashboard/:projectId/tasks/:taskId',
 )
 
 router.patch('/dashboard/:projectId/tasks/:taskId/dates',
-    isProjectMember,
+    belongsToEmpresa,
     param('taskId').isMongoId().withMessage('El id de la tarea es obligatorio'),
     body('startDate').optional({ checkFalsy: true }).isISO8601().withMessage('Formato de fecha de inicio inválido'),
     body('dueDate').optional({ checkFalsy: true }).isISO8601().withMessage('Formato de fecha límite inválido'),
@@ -157,7 +168,7 @@ router.patch('/dashboard/:projectId/tasks/:taskId/dates',
 )
 
 router.patch('/dashboard/:projectId/tasks/:taskId/priority',
-    isProjectMember,
+    belongsToEmpresa,
     param('taskId').isMongoId().withMessage('El id de la tarea es obligatorio'),
     body('priority').optional().isIn([...Object.values(taskPriority), null]).withMessage('Prioridad inválida'),
     handleErrors,
@@ -165,7 +176,7 @@ router.patch('/dashboard/:projectId/tasks/:taskId/priority',
 )
 
 router.patch('/dashboard/:projectId/tasks/:taskId/assign',
-    isProjectMember,
+    belongsToEmpresa,
     body('userIds').isArray().withMessage('Se requiere un array de identificadores de usuario'),
     handleErrors,
     TaskController.assignTask
@@ -173,6 +184,7 @@ router.patch('/dashboard/:projectId/tasks/:taskId/assign',
 
 //endpoint para cambiar el estado de una tarea
 router.post('/dashboard/:projectId/tasks/:taskId/status',
+    belongsToEmpresa,
     param('taskId').isMongoId().withMessage('El id de la tarea es obligatorio'),
     body('status').notEmpty().withMessage('El status es obligatorio'),
     handleErrors,
@@ -181,18 +193,21 @@ router.post('/dashboard/:projectId/tasks/:taskId/status',
 
 /* Routes for subtasks */
 router.get('/dashboard/:projectId/tasks/:taskId/subtasks',
+    belongsToEmpresa,
     param('taskId').isMongoId().withMessage('El id de la tarea es obligatorio'),
     handleErrors,
     TaskController.getSubtasks
 )
 
 router.get('/dashboard/:projectId/tasks/:taskId/tree',
+    belongsToEmpresa,
     param('taskId').isMongoId().withMessage('El id de la tarea es obligatorio'),
     handleErrors,
     TaskController.getTaskTree
 )
 
 router.put('/dashboard/:projectId/tasks/:taskId/move',
+    belongsToEmpresa,
     isProjectMember,
     param('taskId').isMongoId().withMessage('El id de la tarea padre es obligatorio'),
     body('newParentTask').isMongoId().withMessage('El id de la tarea padre es obligatorio'),
@@ -203,26 +218,31 @@ router.put('/dashboard/:projectId/tasks/:taskId/move',
 /* Routes for teams */
 //preguntamos al usuario cual es su email para agregarle al proyecto
 router.post('/dashboard/:projectId/team/search',
+    belongsToEmpresa,
     body('email').isEmail().withMessage('El email es obligatorio'),
     handleErrors,
     TeamMemberController.findMemberByEmail
 )
 
 router.post('/dashboard/:projectId/team',
+    belongsToEmpresa,
     body('id').isMongoId().withMessage('ID no válido'),
     handleErrors,
     TeamMemberController.addTeamMember
 )
 
 router.get('/dashboard/:projectId/team',
+    belongsToEmpresa,
     TeamMemberController.getAllTeamMember
 )
 
 router.get('/dashboard/:projectId/members',
+    belongsToEmpresa,
     TeamMemberController.getProjectMembers
 )
 
 router.delete('/dashboard/:projectId/team/:userId',
+    belongsToEmpresa,
     param('userId').isMongoId().withMessage('ID no válido'),
     handleErrors,
     TeamMemberController.removeMemberById
@@ -230,16 +250,19 @@ router.delete('/dashboard/:projectId/team/:userId',
 
 /*----- Rutas para las notas -----*/
 router.post('/dashboard/projects/:projectId/tasks/:taskId/notes',
+    belongsToEmpresa,
     body('content').notEmpty().withMessage('El contenido de la nota es obligatorio'),
     handleErrors,
     NoteController.createNote
 )
 
 router.get('/dashboard/projects/:projectId/tasks/:taskId/notes',
+    belongsToEmpresa,
     NoteController.getTaskNotes
 )
 
 router.delete('/dashboard/projects/:projectId/tasks/:taskId/notes/:noteId',
+    belongsToEmpresa,
     param('noteId').isMongoId().withMessage('El id de la nota es obligatorio'),
     handleErrors,
     NoteController.deleteNote

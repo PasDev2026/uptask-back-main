@@ -26,11 +26,18 @@ export class TeamMemberController {
     static addTeamMember = async (req: Request, res: Response) => {
         const { id } = req.body
         //Find user
-        const user = await User.findById(id).select('id')
+        const user = await User.findById(id).select('id empresas')
         if(!user){
             const error = new Error('Usuario no encontrado')
             res.status(404).json({error: error.message});
             return 
+        }
+
+        const userEmpresas = user.empresas.map(e => e.toString())
+        if (!userEmpresas.includes(req.project.empresa.toString())) {
+            const error = new Error('El usuario no pertenece a la empresa del proyecto')
+            res.status(403).json({error: error.message});
+            return
         }
 
         if(req.project.team.some(team => team.toString() === user.id.toString())) {

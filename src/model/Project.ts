@@ -16,6 +16,8 @@ export interface IProject extends Document  {
 
     responsible: PopulatedDoc<IUser & Document>[]
 
+    empresa: Types.ObjectId
+
     startDate?: Date
     dueDate?: Date
     status: ProjectStatus
@@ -71,6 +73,11 @@ const ProjectSchema:Schema = new Schema({
         type: String,
         enum: Object.values(taskPriority),
         default: taskPriority.MEDIUM
+    },
+    empresa: {
+        type: Types.ObjectId,
+        ref: 'Empresa',
+        required: true
     },
 }, {timestamps: true})
 

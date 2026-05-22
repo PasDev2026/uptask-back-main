@@ -93,9 +93,9 @@ export class UserController {
   static user = async (req: Request, res: Response) => {
     try {
        const user = await User.findById(req.user.id)
-         .select('_id name email dni role empresa')
+         .select('_id name email dni role empresas')
         .populate('role', 'name')
-        .populate('empresa', 'nombre')
+        .populate('empresas', 'nombre')
         .lean()
 
       res.json(user)
@@ -107,9 +107,9 @@ export class UserController {
   static getAllUsers = async (req: Request, res: Response) => {
     try {
        const users = await User.find()
-         .select('_id name apellido_paterno apellido_materno telefono username dni email role estado empresa')
+         .select('_id name apellido_paterno apellido_materno telefono username dni email role estado empresas')
         .populate('role', 'name')
-        .populate('empresa', 'nombre')
+        .populate('empresas', 'nombre')
         .lean()
 
       res.json(users)
@@ -122,9 +122,9 @@ export class UserController {
     try {
       const { userId } = req.params;
       const user = await User.findById(userId)
-        .select('_id name apellido_paterno apellido_materno telefono username dni email role estado empresa')
+        .select('_id name apellido_paterno apellido_materno telefono username dni email role estado empresas')
         .populate('role', 'name')
-        .populate('empresa', 'nombre')
+        .populate('empresas', 'nombre')
         .lean();
 
       if (!user) {
@@ -216,7 +216,7 @@ export class UserController {
         userId,
         updateData,
         { new: true, runValidators: true }
-      ).populate('role', 'name').populate('empresa', 'nombre')
+      ).populate('role', 'name').populate('empresas', 'nombre')
 
       if (!updatedUser) {
         res.status(404).json({ error: 'Usuario no encontrado' })

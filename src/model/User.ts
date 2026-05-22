@@ -13,7 +13,7 @@ export interface IUser extends Document {
     estado: boolean
     confirmed: boolean
     role: Types.ObjectId
-    empresa?: Types.ObjectId
+    empresas: Types.ObjectId[]
 }
 
 const userSchema: Schema = new Schema({
@@ -67,10 +67,12 @@ const userSchema: Schema = new Schema({
         type: Types.ObjectId,
         ref: 'Role',
     },
-    empresa: {
-        type: Types.ObjectId,
-        ref: 'Empresa',
-    }
+    empresas: [
+        {
+            type: Types.ObjectId,
+            ref: 'Empresa',
+        }
+    ]
 })
 
 userSchema.pre('save', async function (next) {
