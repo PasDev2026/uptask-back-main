@@ -7,12 +7,14 @@ import {connectDB} from './config/db'
 import projectRouter from './router/project.router'
 import authRouter from './router/auth.router'
 import empresaRouter from './router/empresa.router'
-import { seedEmpresas } from './utils/seed'
+import { seedEmpresas, seedRoles, seedAreas } from './utils/seed'
 
 dotenv.config()
 
 connectDB().then(() => {
     seedEmpresas()
+    seedRoles()
+    seedAreas()
 })
 
 const app = express();

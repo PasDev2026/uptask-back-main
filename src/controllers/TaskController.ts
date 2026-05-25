@@ -53,10 +53,10 @@ export class TaskController {
             }
 
             await task.save()
-            res.send('Tarea creada correctamente')
+            res.status(201).json({ message: 'Tarea creada correctamente' })
         } catch (error) {
                 console.log(error);
-            
+                res.status(500).json({ error: 'Error del servidor' })
         }
     }
 
@@ -106,18 +106,18 @@ export class TaskController {
             }
 
             await req.task.save()
-            res.send('Tarea actualizada correctamente')
+            res.status(200).json({ message: 'Tarea actualizada correctamente' })
         } catch (error) {
-            res.status(500).json({error: error.message})
+            res.status(500).json({ error: 'Error del servidor' })
         }
     }
 
     static deleteTask = async(req:Request, res:Response) => {
         try {
             await req.task.deleteOne()
-            res.send('Tarea eliminada correctamente')
+            res.status(200).json({ message: 'Tarea eliminada correctamente' })
         } catch (error) {
-            res.status(500).json({error: error.message})
+            res.status(500).json({ error: 'Error del servidor' })
         }
     }
 
@@ -139,7 +139,7 @@ export class TaskController {
                 progress: result.progress
             })
         } catch (error) {
-            res.status(500).json({error: error.message})
+            res.status(500).json({ error: 'Error del servidor' })
         }
     }
 
@@ -235,7 +235,7 @@ export class TaskController {
                 }
             }
 
-            res.send('Tarea movida correctamente')
+            res.status(200).json({ message: 'Tarea movida correctamente' })
         } catch (error) {
             res.status(500).json({error: error.message})
         }
@@ -257,7 +257,7 @@ export class TaskController {
             }
 
             await req.task.save();
-            res.send('Fechas de la tarea actualizadas correctamente');
+            res.status(200).json({ message: 'Fechas de la tarea actualizadas correctamente' });
         } catch (error) {
             console.log(error);
             res.status(500).json({ error: 'Error del servidor' });
@@ -268,7 +268,7 @@ export class TaskController {
         try {
             req.task.priority = req.body.priority ?? null;
             await req.task.save();
-            res.send('Prioridad actualizada correctamente');
+            res.status(200).json({ message: 'Prioridad actualizada correctamente' });
         } catch (error) {
             console.log(error);
             res.status(500).json({ error: 'Error del servidor' });
@@ -304,7 +304,7 @@ export class TaskController {
             req.task.assignedTo = userIds as any
             await req.task.save()
 
-            res.send('Responsables asignados correctamente')
+            res.status(200).json({ message: 'Responsables asignados correctamente' })
         } catch (error) {
             console.log(error)
             res.status(500).json({ error: 'Error del servidor' })

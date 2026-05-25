@@ -49,7 +49,7 @@ export class TeamMemberController {
         req.project.team.push(user.id)
         await req.project.save()
 
-        res.send('Usuario agregado correctamente')
+        res.status(201).json({ message: 'Usuario agregado correctamente' })
     }
 
     static removeMemberById = async (req: Request, res: Response) => { 
@@ -62,7 +62,7 @@ export class TeamMemberController {
         }
         req.project.team = req.project.team.filter(teamMember => teamMember.toString() !== userId)
         await req.project.save()
-        res.send('Usuario eliminado correctamente')
+        res.status(200).json({ message: 'Usuario eliminado correctamente' })
     }
 
     static getProjectMembers = async (req: Request, res: Response) => {

@@ -9,7 +9,7 @@ const empresaSchema: Schema = new Schema({
         type: String,
         required: true,
         unique: true,
-        enum: ["jesus maria", "golf", "sjm"]
+        enum: ["jesus maria", "golf", "sjm", "hub"]
     }
 })
 

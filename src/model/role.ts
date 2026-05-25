@@ -2,11 +2,8 @@ import mongoose, { Schema, Document } from "mongoose"
 
 export const roleTypes = {
   ADMIN: 'admin',
-  TI: 'ti',
-  CONTABILIDAD: 'contabilidad',
-  FINANZAS: 'finanzas',
-  TESORERIA: 'tesoreria',
-  TALENTOS: 'talentos'
+  SUPERVISOR: 'supervisor',
+  PERSONAL: 'personal'
 } as const
 
 export type RoleType = typeof roleTypes[keyof typeof roleTypes]
@@ -20,7 +17,7 @@ const roleSchema: Schema = new Schema({
   name: {
     type: String,
     enum: Object.values(roleTypes),
-    default: roleTypes.TI,
+    default: roleTypes.PERSONAL,
     required: true
   }
 })

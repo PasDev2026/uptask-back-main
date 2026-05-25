@@ -12,9 +12,10 @@ export class ProjectController {
       const search = req.query.search as string | undefined;
       const dateFrom = req.query.dateFrom as string | undefined;
       const dateTo = req.query.dateTo as string | undefined;
+      const empresa = req.query.empresa as string | undefined;
       const offset = parseInt(req.query.offset as string) || 0;
       const limit = parseInt(req.query.limit as string) || 10;
-      const { projects, total } = await ProjectService.findAllForUser(req.user.id, search, dateFrom, dateTo, offset, limit, req.user.empresas)
+      const { projects, total } = await ProjectService.findAllForUser(req.user.id, search, dateFrom, dateTo, empresa, offset, limit, req.user.empresas)
       resp.json({ projects, total });
     } catch (error) {
       console.log(error);
@@ -61,7 +62,7 @@ export class ProjectController {
  
     try {
       await project.save();
-      res.send('Proyecto creado correctamente');
+      res.status(201).send('Proyecto creado correctamente');
     } catch (error) {
       console.log(error);
       res.status(500).json({ error: error.message });
@@ -184,7 +185,7 @@ export class ProjectController {
         req.project.dueDate = req.body.dueDate
       }
       await req.project.save();
-      res.send("Proyecto actualizado correctamente");
+      res.status(200).send("Proyecto actualizado correctamente");
     } catch (error) {
       console.log(error);
     }
@@ -232,7 +233,7 @@ export class ProjectController {
         res.status(404).json({ error: 'Proyecto no encontrado' })
         return
       }
-      res.send('Estado actualizado correctamente')
+      res.status(200).send('Estado actualizado correctamente')
     } catch (error) {
       console.log(error)
       res.status(500).json({ error: 'Error del servidor' })
@@ -251,7 +252,7 @@ export class ProjectController {
         res.status(404).json({ error: 'Proyecto no encontrado' })
         return
       }
-      res.send('Prioridad actualizada correctamente')
+      res.status(200).send('Prioridad actualizada correctamente')
     } catch (error) {
       console.log(error)
       res.status(500).json({ error: 'Error del servidor' })
@@ -283,7 +284,7 @@ export class ProjectController {
       project.responsible = userIds as any
       await project.save()
 
-      res.send('Responsables actualizados correctamente')
+      res.status(200).json({ message: 'Responsables actualizados correctamente' })
     } catch (error) {
       console.log(error)
       res.status(500).json({ error: 'Error del servidor' })

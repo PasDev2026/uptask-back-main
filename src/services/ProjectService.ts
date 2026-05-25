@@ -88,6 +88,17 @@ export class ProjectService {
         },
       },
       {
+        $lookup: {
+          from: "empresas",
+          localField: "empresa",
+          foreignField: "_id",
+          as: "empresa",
+        },
+      },
+      {
+        $unwind: { path: "$empresa", preserveNullAndEmptyArrays: true },
+      },
+      {
         $project: {
           tasks: 0,
           totalTasks: 0,
@@ -101,10 +112,13 @@ export class ProjectService {
     return projects;
   }
 
-  static async findAllForUser(userId: string, search?: string, dateFrom?: string, dateTo?: string, offset = 0, limit = 10, empresaIds?: Types.ObjectId[]) {
+  static async findAllForUser(userId: string, search?: string, dateFrom?: string, dateTo?: string, empresa?: string, offset = 0, limit = 10, empresaIds?: Types.ObjectId[]) {
     if (empresaIds && empresaIds.length === 0) return { projects: [], total: 0 };
 
-    const empresaFilter = empresaIds ? { empresa: { $in: empresaIds } } : {};
+    const empresaFilter: Record<string, unknown> = empresaIds ? { empresa: { $in: empresaIds } } : {};
+    if (empresa && empresaIds?.some(e => e.toString() === empresa)) {
+      empresaFilter.empresa = new Types.ObjectId(empresa);
+    }
 
     const userProjects = await Project.find(empresaFilter).select('_id');
 

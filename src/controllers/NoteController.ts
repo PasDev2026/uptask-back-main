@@ -25,9 +25,9 @@ export class NoteController {
 
         try {
             await Promise.allSettled([req.task.save(), note.save()])
-            res.send('Nota creada correctamente')
+            res.status(201).json({ message: 'Nota creada correctamente' })
         } catch (error) {
-            res.status(500).json({message: 'Hubo un error'})
+            res.status(500).json({ error: 'Error del servidor' })
         }
     }
 
@@ -36,7 +36,7 @@ export class NoteController {
             const notes = await Note.find({task: req.task.id}) //trayendo una tarea
             res.json(notes)
         } catch (error) {
-            
+            res.status(500).json({error: 'Error del servidor'})
         }
     
     }
@@ -60,9 +60,9 @@ export class NoteController {
 
         try {
             await Promise.allSettled([req.task.save(), note.deleteOne()])
-            res.send('Nota eliminada correctamente')
+            res.status(200).json({ message: 'Nota eliminada correctamente' })
         } catch (error) {
-            
+            res.status(500).json({ error: 'Error del servidor' })
         }
 
     }

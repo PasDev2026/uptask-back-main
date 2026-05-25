@@ -13,6 +13,7 @@ export interface IUser extends Document {
     estado: boolean
     confirmed: boolean
     role: Types.ObjectId
+    area: Types.ObjectId
     empresas: Types.ObjectId[]
 }
 
@@ -67,6 +68,10 @@ const userSchema: Schema = new Schema({
         type: Types.ObjectId,
         ref: 'Role',
     },
+    area: {
+        type: Types.ObjectId,
+        ref: 'Area',
+    },
     empresas: [
         {
             type: Types.ObjectId,
@@ -78,10 +83,10 @@ const userSchema: Schema = new Schema({
 userSchema.pre('save', async function (next) {
     try {
         if (this.isNew && !this.role) {
-            const roleUser = await Role.findOne({ name: 'ti' })
+            const roleUser = await Role.findOne({ name: 'personal' })
 
             if (!roleUser) {
-                return next(new Error("Rol 'ti' no existe en BD"))
+                return next(new Error("Rol 'personal' no existe en BD"))
             }
 
             this.role = roleUser._id

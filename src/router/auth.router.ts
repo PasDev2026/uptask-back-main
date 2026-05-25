@@ -3,7 +3,6 @@ import { UserController } from '../controllers/UserController'
 import { handleErrors } from '../middleware/validation'
 import { body, param } from 'express-validator'
 import { authenticateToken, authorizeRole } from '../middleware/auth'
-import { roleTypes } from '../model/role'
 
 const router = Router()
 
@@ -20,6 +19,7 @@ router.post('/users',
     body('password').isLength({min:8}).not().isEmpty().withMessage('El password es obligatorio'),
     body('email').optional().isEmail().withMessage('El email no es válido'),
     body('role').optional().isMongoId().withMessage('ID de rol no válido'),
+    body('area').optional().isMongoId().withMessage('ID de área no válido'),
     handleErrors,
     UserController.createUserByAdmin
 )
@@ -62,6 +62,7 @@ router.patch('/users/:userId/update-profile',
     authorizeRole('admin'),
     body('email').optional().isEmail().withMessage('El email no es válido'),
     body('role').optional().isMongoId().withMessage('ID de rol no válido'),
+    body('area').optional().isMongoId().withMessage('ID de área no válido'),
     body('name').optional().notEmpty().withMessage('El nombre no puede estar vacío'),
     body('apellido_paterno').optional().notEmpty().withMessage('El apellido paterno no puede estar vacío'),
     body('apellido_materno').optional().notEmpty().withMessage('El apellido materno no puede estar vacío'),
@@ -116,6 +117,12 @@ router.get('/roles',
     authenticateToken,
     authorizeRole('admin'),
     UserController.getRoles
+)
+
+router.get('/areas',
+    authenticateToken,
+    authorizeRole('admin'),
+    UserController.getAreas
 )
 
 

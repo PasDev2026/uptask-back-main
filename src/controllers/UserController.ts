@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import User from "../model/User";
 import Role from "../model/role";
+import Area from "../model/area";
 import { checkPassword, hashPassword } from "../utils/bcrypt";
 import { generateJWT } from "../utils/jwt";
 import mongoose from 'mongoose';
@@ -8,7 +9,7 @@ import mongoose from 'mongoose';
 export class UserController {
   static createUserByAdmin = async (req: Request, res: Response) => {
     try {
-      const { password, email, username, dni, role: roleName } = req.body;
+      const { password, email, username, dni, role: roleName, area: areaName } = req.body;
 
       // Verificar username único
       const usernameExists = await User.findOne({ username });
@@ -50,11 +51,21 @@ export class UserController {
         user.role = roleDoc._id as mongoose.Types.ObjectId;
       }
 
+      if (areaName) {
+        const areaDoc = await Area.findById(areaName);
+        if (!areaDoc) {
+          const error = new Error(`Área con ID '${areaName}' no existe`);
+          res.status(400).json({ error: error.message });
+          return;
+        }
+        user.area = areaDoc._id as mongoose.Types.ObjectId;
+      }
+
       await user.save();
 
-      res.send("Usuario creado correctamente");
+      res.status(201).json({ message: 'Usuario creado correctamente' });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: 'Error del servidor' });
     }
   };
 
@@ -93,8 +104,9 @@ export class UserController {
   static user = async (req: Request, res: Response) => {
     try {
        const user = await User.findById(req.user.id)
-         .select('_id name email dni role empresas')
+         .select('_id name email dni role area empresas')
         .populate('role', 'name')
+        .populate('area', 'name')
         .populate('empresas', 'nombre')
         .lean()
 
@@ -107,8 +119,9 @@ export class UserController {
   static getAllUsers = async (req: Request, res: Response) => {
     try {
        const users = await User.find()
-         .select('_id name apellido_paterno apellido_materno telefono username dni email role estado empresas')
+         .select('_id name apellido_paterno apellido_materno telefono username dni email role area estado empresas')
         .populate('role', 'name')
+        .populate('area', 'name')
         .populate('empresas', 'nombre')
         .lean()
 
@@ -122,8 +135,9 @@ export class UserController {
     try {
       const { userId } = req.params;
       const user = await User.findById(userId)
-        .select('_id name apellido_paterno apellido_materno telefono username dni email role estado empresas')
+        .select('_id name apellido_paterno apellido_materno telefono username dni email role area estado empresas')
         .populate('role', 'name')
+        .populate('area', 'name')
         .populate('empresas', 'nombre')
         .lean();
 
@@ -186,6 +200,15 @@ export class UserController {
         // updateData.role ya es el _id, no requiere conversión adicional
       }
 
+      // Si se está actualizando el área
+      if (updateData.area) {
+        const areaDoc = await Area.findById(updateData.area);
+        if (!areaDoc) {
+          res.status(400).json({ error: `Área con ID '${updateData.area}' no existe` });
+          return;
+        }
+      }
+
       if (updateData.email !== undefined) {
         if (updateData.email) {
           const emailExists = await User.findOne({ email: updateData.email })
@@ -216,7 +239,7 @@ export class UserController {
         userId,
         updateData,
         { new: true, runValidators: true }
-      ).populate('role', 'name').populate('empresas', 'nombre')
+      ).populate('role', 'name').populate('area', 'name').populate('empresas', 'nombre')
 
       if (!updatedUser) {
         res.status(404).json({ error: 'Usuario no encontrado' })
@@ -248,9 +271,9 @@ export class UserController {
 
     try {
       await req.user.save();
-      res.send("Perfil actualizado correctamente");
+      res.status(200).json({ message: 'Perfil actualizado correctamente' });
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      res.status(500).json({ error: 'Error del servidor' });
     }
   };
 
@@ -270,9 +293,9 @@ export class UserController {
       user.password = await hashPassword(password)
       try {
         await user.save()
-        res.send('Password actualizado correctamente')
+        res.status(200).json({ message: 'Password actualizado correctamente' })
       } catch (error) {
-          res.status(500).send('Hubo un error')
+          res.status(500).json({ error: 'Hubo un error' })
       }
   }
 
@@ -297,6 +320,15 @@ export class UserController {
       res.json(roles);
     } catch (error) {
       res.status(500).json({ error: 'Error al obtener los roles' });
+    }
+  }
+
+  static getAreas = async (req: Request, res: Response) => {
+    try {
+      const areas = await Area.find().select('_id name').lean();
+      res.json(areas);
+    } catch (error) {
+      res.status(500).json({ error: 'Error al obtener las áreas' });
     }
   }
 }
