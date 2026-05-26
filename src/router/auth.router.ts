@@ -86,6 +86,14 @@ router.patch('/users/:userId',
     UserController.updateUserStatus
 )
 
+router.patch('/users/:userId/reset-password',
+    authenticateToken,
+    authorizeRole('admin'),
+    body('password').isLength({min:8}).withMessage('El password debe tener al menos 8 caracteres'),
+    handleErrors,
+    UserController.resetUserPassword
+)
+
 /* Perfil */
 router.put('/profile',
     authenticateToken,

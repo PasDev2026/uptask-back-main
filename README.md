@@ -32,7 +32,7 @@ npm install
 # Crea un archivo .env en la raíz del proyecto basado en .env.template
 ```
 PORT=4000
-MONGO_URI=tu_url_de_mongo
+DATABASE_URL=tu_url_de_mongo
 JWT_SECRET=un_secreto_super_seguro
 ```
 

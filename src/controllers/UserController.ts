@@ -5,6 +5,7 @@ import Area from "../model/area";
 import { checkPassword, hashPassword } from "../utils/bcrypt";
 import { generateJWT } from "../utils/jwt";
 import mongoose from 'mongoose';
+import { getIO } from '../services/socket.service';
 
 export class UserController {
   static createUserByAdmin = async (req: Request, res: Response) => {
@@ -170,6 +171,16 @@ export class UserController {
         return
       }
 
+      if (estadoValue === false) {
+        try {
+          getIO().to(`user:${userId}`).emit('force-logout', {
+            message: 'Tu cuenta ha sido desactivada por un administrador'
+          })
+        } catch {
+          // Socket.IO no inicializado, continuar normalmente
+        }
+      }
+
       res.json({
         message: 'Usuario actualizado',
         user: {
@@ -329,6 +340,32 @@ export class UserController {
       res.json(areas);
     } catch (error) {
       res.status(500).json({ error: 'Error al obtener las áreas' });
+    }
+  }
+
+  static resetUserPassword = async (req: Request, res: Response) => {
+    try {
+      const { userId } = req.params
+      const { password } = req.body
+
+      const user = await User.findById(userId)
+      if (!user) {
+        res.status(404).json({ error: 'Usuario no encontrado' })
+        return
+      }
+
+      user.password = await hashPassword(password)
+      await user.save()
+
+      try {
+        getIO().to(`user:${userId}`).emit('force-logout', {
+          message: 'Tu contraseña ha sido restablecida por un administrador'
+        })
+      } catch { }
+
+      res.json({ message: 'Contraseña restablecida correctamente' })
+    } catch (error) {
+      res.status(500).json({ error: 'Error al restablecer la contraseña' })
     }
   }
 }

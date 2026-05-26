@@ -25,8 +25,12 @@ export const authenticateToken = async (req: Request, res: Response, next: NextF
         const decoded = jwt.verify(token, process.env.JWT_SECRET)
 
         if(typeof decoded === 'object' && decoded.id){
-            const user = await User.findById(decoded.id).select('_id name email empresas')
+            const user = await User.findById(decoded.id).select('_id name email empresas estado')
             if(user){
+                if(!user.estado){
+                    res.status(401).json({error: 'Usuario inactivo'})
+                    return
+                }
                 req.user = user
                 next()
             }else{
