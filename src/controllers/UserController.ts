@@ -105,7 +105,7 @@ export class UserController {
   static user = async (req: Request, res: Response) => {
     try {
        const user = await User.findById(req.user.id)
-         .select('_id name email dni role area empresas')
+         .select('_id name apellido_paterno email dni role area empresas')
         .populate('role', 'name')
         .populate('area', 'name')
         .populate('empresas', 'nombre')
@@ -119,14 +119,20 @@ export class UserController {
 
   static getAllUsers = async (req: Request, res: Response) => {
     try {
-       const users = await User.find()
-         .select('_id name apellido_paterno apellido_materno telefono username dni email role area estado empresas')
+      const offset = parseInt(req.query.offset as string) || 0
+      const limit = parseInt(req.query.limit as string) || 10
+
+      const total = await User.countDocuments()
+      const users = await User.find()
+        .select('_id name apellido_paterno apellido_materno telefono username dni email role area estado empresas')
         .populate('role', 'name')
         .populate('area', 'name')
         .populate('empresas', 'nombre')
+        .skip(offset)
+        .limit(limit)
         .lean()
 
-      res.json(users)
+      res.json({ users, total, offset, limit })
     } catch (error) {
       res.status(500).json({ error: 'Error al obtener los usuarios' })
     }
