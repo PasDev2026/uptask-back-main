@@ -9,15 +9,10 @@ export interface IProject extends Document  {
     projectName : string
     clientName : string
     description : string
-
     manager: PopulatedDoc<IUser & Document>
-
     team: PopulatedDoc<IUser & Document>[]
-
     responsible: PopulatedDoc<IUser & Document>[]
-
     empresa: Types.ObjectId
-
     startDate?: Date
     dueDate?: Date
     status: ProjectStatus

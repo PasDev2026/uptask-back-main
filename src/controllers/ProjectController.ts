@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import Project from "../model/Project";
 import Task from "../model/Task";
+import User from "../model/User";
 import { ProjectService } from "../services/ProjectService";
 
 export class ProjectController {
@@ -259,6 +260,30 @@ export class ProjectController {
     }
   }
 
+  static getUsersByProjectSede = async (req: Request, res: Response) => {
+    try {
+      const { search } = req.query
+      const empresaId = req.project.empresa
+
+      const query: Record<string, unknown> = { empresas: empresaId }
+
+      if (search && typeof search === 'string' && search.trim()) {
+        const escaped = search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+        query.name = { $regex: escaped, $options: 'i' }
+      }
+
+      const users = await User.find(query)
+        .select('_id name apellido_paterno email area')
+        .populate('area', 'name')
+        .lean()
+
+      res.json(users)
+    } catch (error) {
+      console.log(error)
+      res.status(500).json({ error: 'Error del servidor' })
+    }
+  }
+
   static updateProjectResponsible = async (req: Request, res: Response) => {
     const { userIds } = req.body as { userIds: string[] }
 
@@ -270,14 +295,13 @@ export class ProjectController {
     try {
       const project = req.project
 
-      const validTeamIds = new Set([
-        project.manager.toString(),
-        ...project.team.map((m) => m.toString())
-      ])
+      const validUsers = await User.find({
+        _id: { $in: userIds },
+        empresas: project.empresa
+      }).select('_id').lean()
 
-      const allValid = userIds.every(id => validTeamIds.has(id))
-      if (!allValid) {
-        res.status(400).json({ error: 'Uno o más usuarios no pertenecen al proyecto' })
+      if (validUsers.length !== userIds.length) {
+        res.status(400).json({ error: 'Uno o más usuarios no pertenecen a la sede del proyecto' })
         return
       }
 

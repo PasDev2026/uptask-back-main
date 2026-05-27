@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 
 import Task from "../model/Task";
 import Project from "../model/Project";
+import User from "../model/User";
 import { TaskService } from "../services/TaskService";
 
 
@@ -72,9 +73,9 @@ export class TaskController {
     static getTaskById = async(req:Request, res:Response) => {
         try {
             const task = await Task.findById(req.params.taskId)
-                                .populate({path: 'completedBy.user', select: 'id name email'})
-                                .populate({path: 'notes', populate: {path: 'createdBy', select: 'id name email'}})
-                                .populate('assignedTo', '_id name email')
+                                .populate({path: 'completedBy.user', select: 'id name apellido_paterno email'})
+                                .populate({path: 'notes', populate: {path: 'createdBy', select: 'id name apellido_paterno email'}})
+                                .populate('assignedTo', '_id name apellido_paterno email')
             res.json(task);
         } catch (error) {
             res.status(500).json({error: error.message})
@@ -146,8 +147,8 @@ export class TaskController {
     static getSubtasks = async(req:Request, res:Response) => {
         try {
             const subtasks = await Task.find({ parentTask: req.params.taskId })
-                .populate({path: 'completedBy.user', select: 'id name email'})
-                .populate('assignedTo', '_id name email')
+                .populate({path: 'completedBy.user', select: 'id name apellido_paterno email'})
+                .populate('assignedTo', '_id name apellido_paterno email')
                 .sort({ order: 1 })
             res.json(subtasks)
         } catch (error) {
@@ -163,8 +164,8 @@ export class TaskController {
                     { ancestors: req.params.taskId }
                 ]
             })
-            .populate({path: 'completedBy.user', select: 'id name email'})
-            .populate('assignedTo', '_id name email')
+            .populate({path: 'completedBy.user', select: 'id name apellido_paterno email'})
+            .populate('assignedTo', '_id name apellido_paterno email')
             .sort({ order: 1 })
 
             if (!tasks.length) {
@@ -284,20 +285,13 @@ export class TaskController {
                 return
             }
 
-            const project = await Project.findById(req.project.id).populate('team', '_id')
-            if (!project) {
-                res.status(404).json({ error: 'Proyecto no encontrado' })
-                return
-            }
+            const validUsers = await User.find({
+                _id: { $in: userIds },
+                empresas: req.project.empresa
+            }).select('_id').lean()
 
-            const validTeamIds = new Set([
-                project.manager.toString(),
-                ...project.team.map((m: any) => m._id.toString())
-            ])
-
-            const allValid = userIds.every(id => validTeamIds.has(id))
-            if (!allValid) {
-                res.status(400).json({ error: 'Uno o más usuarios no pertenecen al proyecto' })
+            if (validUsers.length !== userIds.length) {
+                res.status(400).json({ error: 'Uno o más usuarios no pertenecen a la sede del proyecto' })
                 return
             }
 

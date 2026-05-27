@@ -98,6 +98,11 @@ router.patch('/dashboard/projects/:projectId/responsible',
     ProjectController.updateProjectResponsible
 )
 
+router.get('/dashboard/projects/:projectId/sede-users',
+    belongsToEmpresa,
+    ProjectController.getUsersByProjectSede
+)
+
 /* Routes for task */
 router.param('taskId', tasktExists)
 router.param('taskId', taskBelongToProject)
