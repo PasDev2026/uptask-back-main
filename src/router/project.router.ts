@@ -92,7 +92,6 @@ router.patch('/dashboard/projects/:id/priority',
 
 router.patch('/dashboard/projects/:projectId/responsible',
     belongsToEmpresa,
-    hasAuthorization,
     body('userIds').isArray().withMessage('Se requiere un array de identificadores de usuario'),
     handleErrors,
     ProjectController.updateProjectResponsible
