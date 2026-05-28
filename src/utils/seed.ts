@@ -4,7 +4,7 @@ import Area from "../model/area"
 import { roleTypes } from "../model/role"
 import { areaTypes } from "../model/area"
 
-const SEDES = ["jesus maria", "golf", "sjm", "hub"]
+const SEDES = ["jesus maria", "golf", "sjm", "hub", "operaciones", "talentos", "marketing", "finanzas", "contabilidad", "ti"]
 
 export const seedEmpresas = async () => {
     try {
