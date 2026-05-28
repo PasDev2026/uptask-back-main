@@ -9,11 +9,17 @@ export interface ProjectProgress {
 
 export class ProjectService {
 
-  static async findAllWithProgress(filter: Record<string, unknown>, offset = 0, limit = 0) {
+  static SORTABLE_FIELDS = ['projectName', 'createdAt', 'startDate', 'dueDate', 'status', 'priority'] as const;
+
+  static async findAllWithProgress(filter: Record<string, unknown>, offset = 0, limit = 0, sortBy?: string, sortOrder?: string) {
     const now = new Date();
     const pipeline: PipelineStage[] = [
       { $match: filter } as PipelineStage,
     ];
+    if (sortBy && ProjectService.SORTABLE_FIELDS.includes(sortBy as any)) {
+      const order = sortOrder === 'desc' ? -1 : 1;
+      pipeline.push({ $sort: { [sortBy]: order } } as PipelineStage);
+    }
     if (offset > 0) pipeline.push({ $skip: offset } as PipelineStage);
     if (limit > 0) pipeline.push({ $limit: limit } as PipelineStage);
     pipeline.push(
@@ -112,7 +118,7 @@ export class ProjectService {
     return projects;
   }
 
-  static async findAllForUser(userId: string, search?: string, dateFrom?: string, dateTo?: string, empresa?: string, offset = 0, limit = 10, empresaIds?: Types.ObjectId[]) {
+  static async findAllForUser(userId: string, search?: string, dateFrom?: string, dateTo?: string, empresa?: string, offset = 0, limit = 10, empresaIds?: Types.ObjectId[], sortBy?: string, sortOrder?: string) {
     if (empresaIds && empresaIds.length === 0) return { projects: [], total: 0 };
 
     const empresaFilter: Record<string, unknown> = empresaIds ? { empresa: { $in: empresaIds } } : {};
@@ -162,7 +168,7 @@ export class ProjectService {
     }
 
     const total = await Project.countDocuments(filter);
-    const projects = await ProjectService.findAllWithProgress(filter, offset, limit);
+    const projects = await ProjectService.findAllWithProgress(filter, offset, limit, sortBy, sortOrder);
     return { projects, total };
   }
 

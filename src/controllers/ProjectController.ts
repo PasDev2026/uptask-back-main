@@ -16,7 +16,9 @@ export class ProjectController {
       const empresa = req.query.empresa as string | undefined;
       const offset = parseInt(req.query.offset as string) || 0;
       const limit = parseInt(req.query.limit as string) || 10;
-      const { projects, total } = await ProjectService.findAllForUser(req.user.id, search, dateFrom, dateTo, empresa, offset, limit, req.user.empresas)
+      const sortBy = req.query.sortBy as string | undefined;
+      const sortOrder = req.query.sortOrder as string | undefined;
+      const { projects, total } = await ProjectService.findAllForUser(req.user.id, search, dateFrom, dateTo, empresa, offset, limit, req.user.empresas, sortBy, sortOrder)
       resp.json({ projects, total });
     } catch (error) {
       console.log(error);
