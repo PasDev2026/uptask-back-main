@@ -61,15 +61,6 @@ export class TaskController {
         }
     }
 
-    static getProjectTask = async(req:Request, res: Response) => {
-        try {
-            const task = await Task.find({project: req.project.id}).populate('project').populate('assignedTo', '_id name email')
-            res.json(task);
-        } catch (error) {
-            res.status(500).json({error: error.message})
-        }
-    }
-
     static getTaskById = async(req:Request, res:Response) => {
         try {
             const task = await Task.findById(req.params.taskId)
@@ -150,7 +141,8 @@ export class TaskController {
                 .populate({path: 'completedBy.user', select: 'id name apellido_paterno email'})
                 .populate('assignedTo', '_id name apellido_paterno email')
                 .sort({ order: 1 })
-            res.json(subtasks)
+            const subtasksWithCounts = await (Task as any).attachSubtaskCounts(subtasks)
+            res.json(subtasksWithCounts)
         } catch (error) {
             res.status(500).json({error: error.message})
         }

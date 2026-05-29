@@ -7,7 +7,6 @@ import { projectStatus, ProjectStatus, taskPriority, TaskPriority } from "../con
 
 export interface IProject extends Document  {
     projectName : string
-    clientName : string
     description : string
     manager: PopulatedDoc<IUser & Document>
     team: PopulatedDoc<IUser & Document>[]
@@ -21,11 +20,6 @@ export interface IProject extends Document  {
 
 const ProjectSchema:Schema = new Schema({
     projectName: {
-        type: String,
-        required: true,
-        trim    : true,
-    },
-    clientName: {
         type: String,
         required: true,
         trim    : true,

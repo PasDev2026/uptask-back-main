@@ -76,7 +76,7 @@ export class UserController {
       const user = await User.findOne({ username });
       if (!user) {
         const error = new Error("El usuario no existe");
-        res.status(401).json({ error: error.message });
+        res.status(401).json({ error: error.message, field: "username" });
         return;
       }
 
@@ -84,14 +84,14 @@ export class UserController {
       const isPasswordCorrect = await checkPassword(password, user.password);
       if (!isPasswordCorrect) {
         const error = new Error("Password Incorrecto");
-        res.status(401).json({ error: error.message });
+        res.status(401).json({ error: error.message, field: "password" });
         return;
       }
 
       // Verificar estado del usuario
       if (!user.estado) {
         const error = new Error("La cuenta de usuario está inactiva, no puede iniciar sesión");
-        res.status(401).json({ error: error.message });
+        res.status(401).json({ error: error.message, field: "general" });
         return;
       }
 

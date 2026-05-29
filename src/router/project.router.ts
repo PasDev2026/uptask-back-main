@@ -20,7 +20,6 @@ router.use('/dashboard',authenticateToken) //<-protege todos los endpoint que us
 
 router.post('/dashboard/projects',
     body('projectName').not().isEmpty().withMessage('El nombre del proyecto es obligatorio'),
-    body('clientName').not().isEmpty().withMessage('El nombre del cliente es obligatorio'),
     body('description').not().isEmpty().withMessage('La descripcion es obligatoria'),
     body('empresa').not().isEmpty().withMessage('La empresa es obligatoria'),
     body('startDate').optional().isISO8601().withMessage('Formato de fecha de inicio inválido'),
@@ -39,7 +38,7 @@ router.get('/dashboard/projects/:id',
     ProjectController.getProjectById
 )
 
-router.get('/dashboard/projects/:id/tasks-preview',
+router.get('/dashboard/projects/:id/tasks',
     param('id').isMongoId().withMessage('El id es obligatorio'),
     handleErrors,
     ProjectController.getProjectTasksPreview
@@ -50,7 +49,6 @@ router.param('projectId', validateProjectExists)
 router.put('/dashboard/projects/:projectId',
     param('projectId').isMongoId().withMessage('El id es obligatorio'),
     body('projectName').not().isEmpty().withMessage('El nombre del proyecto es obligatorio'),
-    body('clientName').not().isEmpty().withMessage('El nombre del cliente es obligatorio'),
     body('description').not().isEmpty().withMessage('La descripcion es obligatoria'),
     body('startDate').optional().isISO8601().withMessage('Formato de fecha de inicio inválido'),
     body('dueDate').optional().isISO8601().withMessage('Formato de fecha límite inválido'),
@@ -123,13 +121,6 @@ router.post('/dashboard/:projectId/tasks',
     body('priority').optional().isIn(Object.values(taskPriority)).withMessage('Prioridad inválida'),
     handleErrors,
     TaskController.createTask
-)
-
-router.get('/dashboard/:projectId/tasks', 
-    belongsToEmpresa,
-    param('projectId').isMongoId().withMessage('El id es obligatorio'),
-    handleErrors,
-    TaskController.getProjectTask
 )
 
 router.get('/dashboard/:projectId/tasks/:taskId', 

@@ -132,6 +132,18 @@ TaskSchema.pre('deleteOne', {document: true}, async function() {
     }
 })
 
+TaskSchema.statics.attachSubtaskCounts = async function(tasks: ITask[]) {
+    const taskIds = tasks.map(t => t._id)
+    if (taskIds.length === 0) return tasks.map(t => ({ ...t.toObject(), subtaskCount: 0 }))
+
+    const counts = await this.aggregate([
+        { $match: { parentTask: { $in: taskIds } } },
+        { $group: { _id: '$parentTask', count: { $sum: 1 } } }
+    ])
+
+    const map = new Map(counts.map((c: { _id: Types.ObjectId, count: number }) => [c._id.toString(), c.count]))
+    return tasks.map(t => ({ ...t.toObject(), subtaskCount: map.get(t._id.toString()) || 0 }))
+}
 
 const Task = mongoose.model<ITask>('Task', TaskSchema )
 export default Task

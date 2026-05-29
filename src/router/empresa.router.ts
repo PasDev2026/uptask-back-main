@@ -16,7 +16,7 @@ router.get('/',
 router.post('/',
     authenticateToken,
     authorizeRole('admin'),
-    body('nombre').isIn(['jesus maria', 'golf', 'sjm', 'hub', 'operaciones', 'talentos', 'marketing', 'finanzas', 'contabilidad', 'ti']).withMessage('Nombre de sede no válido'),
+    body('nombre').isIn(['jesus maria', 'golf', 'sjm', 'hub', 'internacional', 'operaciones', 'talentos', 'marketing', 'finanzas', 'contabilidad', 'ti']).withMessage('Nombre de sede no válido'),
     handleErrors,
     EmpresaController.createEmpresa
 )

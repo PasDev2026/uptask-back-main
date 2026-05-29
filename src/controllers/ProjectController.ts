@@ -92,6 +92,7 @@ export class ProjectController {
       }
 
       const tasks = await Task.find({ project: id }).populate('assignedTo', '_id name email')
+      const tasksWithCounts = await (Task as any).attachSubtaskCounts(tasks)
       const totalTasks = tasks.length
       const completedTasks = tasks.filter(t => t.status === 'completed').length
       const progress = {
@@ -101,7 +102,7 @@ export class ProjectController {
       }
       const isOverdue = project.dueDate ? project.dueDate < new Date() : false
 
-      res.json({ ...project.toObject(), tasks, progress, isOverdue });
+      res.json({ ...project.toObject(), tasks: tasksWithCounts, progress, isOverdue });
     } catch (error) {
       console.log(error);
     }
@@ -128,11 +129,12 @@ export class ProjectController {
         .populate('assignedTo', '_id name email')
         .sort({ status: 1, createdAt: -1 })
 
+      const tasksWithCounts = await (Task as any).attachSubtaskCounts(tasks)
       const totalTasks = tasks.length
       const completedTasks = tasks.filter(t => t.status === 'completed').length
 
       res.json({
-        tasks,
+        tasks: tasksWithCounts,
         total: totalTasks,
         progress: {
           percentage: totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0,
@@ -178,7 +180,6 @@ export class ProjectController {
         }
       }
 
-      req.project.clientName = req.body.clientName
       req.project.projectName = req.body.projectName
       req.project.description = req.body.description
       if (req.body.startDate !== undefined) {
