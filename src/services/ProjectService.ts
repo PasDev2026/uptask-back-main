@@ -118,7 +118,7 @@ export class ProjectService {
     return projects;
   }
 
-  static async findAllForUser(userId: string, search?: string, dateFrom?: string, dateTo?: string, empresa?: string, offset = 0, limit = 10, empresaIds?: Types.ObjectId[], sortBy?: string, sortOrder?: string) {
+  static async findAllForUser(userId: string, search?: string, dateFrom?: string, dateTo?: string, empresa?: string, offset = 0, limit = 10, empresaIds?: Types.ObjectId[], sortBy?: string, sortOrder?: string, status?: string) {
     if (empresaIds && empresaIds.length === 0) return { projects: [], total: 0 };
 
     const empresaFilter: Record<string, unknown> = empresaIds ? { empresa: { $in: empresaIds } } : {};
@@ -134,6 +134,10 @@ export class ProjectService {
     const filter: Record<string, unknown> = { _id: { $in: projectIds } };
     if (search) {
       filter.projectName = { $regex: search, $options: 'i' };
+    }
+
+    if (status) {
+      filter.status = status;
     }
 
     if (dateFrom || dateTo) {

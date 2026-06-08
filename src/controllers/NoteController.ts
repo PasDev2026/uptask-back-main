@@ -21,10 +21,8 @@ export class NoteController {
         note.createdBy = req.user.id
         note.task = req.task.id
 
-        req.task.notes.push(note.id)
-
         try {
-            await Promise.allSettled([req.task.save(), note.save()])
+            await note.save()
             res.status(201).json({ message: 'Nota creada correctamente' })
         } catch (error) {
             res.status(500).json({ error: 'Error del servidor' })
@@ -56,10 +54,8 @@ export class NoteController {
             res.status(404).json({error: error.message});
         }
 
-        req.task.notes = req.task.notes.filter(note => note.toString() !== noteId.toString())   
-
         try {
-            await Promise.allSettled([req.task.save(), note.deleteOne()])
+            await note.deleteOne()
             res.status(200).json({ message: 'Nota eliminada correctamente' })
         } catch (error) {
             res.status(500).json({ error: 'Error del servidor' })

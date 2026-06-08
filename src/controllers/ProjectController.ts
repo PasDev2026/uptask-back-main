@@ -14,11 +14,12 @@ export class ProjectController {
       const dateFrom = req.query.dateFrom as string | undefined;
       const dateTo = req.query.dateTo as string | undefined;
       const empresa = req.query.empresa as string | undefined;
+      const status = req.query.status as string | undefined;
       const offset = parseInt(req.query.offset as string) || 0;
       const limit = parseInt(req.query.limit as string) || 10;
       const sortBy = req.query.sortBy as string | undefined;
       const sortOrder = req.query.sortOrder as string | undefined;
-      const { projects, total } = await ProjectService.findAllForUser(req.user.id, search, dateFrom, dateTo, empresa, offset, limit, req.user.empresas, sortBy, sortOrder)
+      const { projects, total } = await ProjectService.findAllForUser(req.user.id, search, dateFrom, dateTo, empresa, offset, limit, req.user.empresas, sortBy, sortOrder, status)
       resp.json({ projects, total });
     } catch (error) {
       console.log(error);
@@ -189,7 +190,7 @@ export class ProjectController {
         req.project.dueDate = req.body.dueDate
       }
       await req.project.save();
-      res.status(200).send("Proyecto actualizado correctamente");
+      res.status(200).json({ message: "Proyecto actualizado correctamente" });
     } catch (error) {
       console.log(error);
     }
@@ -199,7 +200,7 @@ export class ProjectController {
     
     try {
       await req.project.deleteOne()
-      res.send("Proyecto eliminado correctamente");
+      res.status(200).json({ message: "Proyecto eliminado correctamente" });
     } catch (error) {
       console.log(error);
     }
@@ -237,7 +238,7 @@ export class ProjectController {
         res.status(404).json({ error: 'Proyecto no encontrado' })
         return
       }
-      res.status(200).send('Estado actualizado correctamente')
+      res.status(200).json({ message: 'Estado actualizado correctamente' })
     } catch (error) {
       console.log(error)
       res.status(500).json({ error: 'Error del servidor' })

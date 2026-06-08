@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import mongoose from "mongoose";
 
 import Task from "../model/Task";
+import Note from "../model/Note";
 import Project from "../model/Project";
 import User from "../model/User";
 import { TaskService } from "../services/TaskService";
@@ -63,11 +64,14 @@ export class TaskController {
 
     static getTaskById = async(req:Request, res:Response) => {
         try {
-            const task = await Task.findById(req.params.taskId)
-                                .populate({path: 'completedBy.user', select: 'id name apellido_paterno email'})
-                                .populate({path: 'notes', populate: {path: 'createdBy', select: 'id name apellido_paterno email'}})
-                                .populate('assignedTo', '_id name apellido_paterno email')
-            res.json(task);
+            const [task, notes] = await Promise.all([
+                Task.findById(req.params.taskId)
+                    .populate({path: 'completedBy.user', select: 'id name apellido_paterno email'})
+                    .populate('assignedTo', '_id name apellido_paterno email'),
+                Note.find({task: req.params.taskId})
+                    .populate('createdBy', 'id name apellido_paterno email')
+            ])
+            res.json({ ...task?.toObject(), notes });
         } catch (error) {
             res.status(500).json({error: error.message})
         }

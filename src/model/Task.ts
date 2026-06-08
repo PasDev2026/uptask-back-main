@@ -22,7 +22,6 @@ export interface ITask extends Document {
         user: Types.ObjectId,
         status: TaskStatus
     }[]
-    notes: Types.ObjectId[]
     assignedTo: Types.ObjectId[]
     startDate?: Date
     dueDate?: Date
@@ -68,12 +67,6 @@ export const TaskSchema: Schema = new Schema({
                 enum: Object.values(taskStatus),
                 default: taskStatus.PENDING
             }
-        }
-    ],
-    notes: [
-        {
-            type: Types.ObjectId,
-            ref: 'Note'
         }
     ],
     assignedTo: [
